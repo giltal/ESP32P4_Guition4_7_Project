@@ -1,0 +1,26 @@
+ESP32P4 Guition 4.3" Platform
+Copyright 2026 Gil Tal
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+This product includes third-party software, all under the Apache License 2.0:
+
+  components/st7701_lcd/
+  components/gt911_touch/
+      Derived from Espressif's esp_lcd_st7701 and esp_lcd_touch_gt911
+      components.  Copyright Espressif Systems (Shanghai) CO LTD.
+      https://github.com/espressif/esp-bsp
+
+  components/pngdec/
+      PNGdec by Larry Bank (bitbank2), plus the zlib inflate sources it
+      vendors.  https://github.com/bitbank2/PNGdec
+
+  components/bsp/network_adapter.bin
+      Prebuilt ESP32-C6 co-processor image, compiled unmodified from
+      Espressif's esp-hosted-mcu slave example, version 2.0.17.
+      Copyright Espressif Systems (Shanghai) CO LTD.
+      https://github.com/espressif/esp-hosted-mcu
+      Pinned to 2.0.17 deliberately — see CLAUDE.md.
+
+Built against ESP-IDF and LVGL, which are fetched at build time and are not
+redistributed here.

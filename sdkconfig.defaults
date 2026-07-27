@@ -1,0 +1,122 @@
+# ── Target ──────────────────────────────────────────────────────────
+CONFIG_IDF_TARGET="esp32p4"
+
+# ── PSRAM (32 MB, HEX mode @ 200 MHz) ───────────────────────────────
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_HEX=y
+CONFIG_SPIRAM_SPEED_200M=y
+# PSRAM joins the general heap, so plain malloc() can return it. LVGL relies
+# on this (see the LVGL block below); heap_caps_malloc still works as before.
+CONFIG_SPIRAM_USE_MALLOC=y
+CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
+CONFIG_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY=y
+
+# ── Flash / partitions ──────────────────────────────────────────────
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# ── OTA ─────────────────────────────────────────────────────────────
+# Roll back automatically unless the new image calls
+# esp_ota_mark_app_valid_cancel_rollback() after it verifies itself.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# The version string the update logic compares against to refuse re-flashing
+# an image the device is already running. Bump it for every release.
+CONFIG_APP_PROJECT_VER_FROM_CONFIG=y
+CONFIG_APP_PROJECT_VER="1.0.0"
+
+# Validate HTTPS update servers against the bundled root certificates.
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+
+# Also accept plain-HTTP update URLs. Convenient when serving images from a
+# laptop on the bench; turn this off for production, where an unauthenticated
+# transport lets anyone on the network install firmware.
+CONFIG_ESP_HTTPS_OTA_ALLOW_HTTP=y
+
+# ── Display (MIPI-DSI) ──────────────────────────────────────────────
+CONFIG_SOC_MIPI_DSI_SUPPORTED=y
+
+# ── FreeRTOS / system ───────────────────────────────────────────────
+CONFIG_FREERTOS_HZ=1000
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384
+CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG=y
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+# ── LVGL ────────────────────────────────────────────────────────────
+CONFIG_LV_COLOR_DEPTH_16=y
+CONFIG_LV_DEF_REFR_PERIOD=16          # ~60 Hz
+
+# Allocate through the C library rather than LVGL's built-in pool. The pool is
+# a fixed static array in .bss; at any useful size it exhausts the P4's
+# internal SRAM at link time ("--enable-non-contiguous-regions discards
+# section ..."), because SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY does not move it
+# out. With CLIB malloc plus SPIRAM_USE_MALLOC below, LVGL draws from the
+# unified heap and spills into PSRAM as needed.
+CONFIG_LV_USE_CLIB_MALLOC=y
+
+# Render the screen into a buffer, for screenshots (see bsp_screenshot.c).
+CONFIG_LV_USE_SNAPSHOT=y
+
+CONFIG_LV_FONT_MONTSERRAT_14=y
+CONFIG_LV_FONT_MONTSERRAT_16=y
+CONFIG_LV_FONT_MONTSERRAT_20=y
+CONFIG_LV_FONT_MONTSERRAT_28=y
+
+# ── FAT (long filenames on SD and the storage partition) ────────────
+CONFIG_FATFS_LFN_HEAP=y
+CONFIG_FATFS_MAX_LFN=255
+
+# ── Radio: ESP32-C6 over ESP-Hosted, SDIO slot 1 ────────────────────
+# The P4 has no radio of its own. The C6 inside the JC-ESP32P4-M3 module runs
+# the ESP-Hosted slave; the SDIO bus below is module-internal wiring, mirrored
+# in components/bsp/include/board_pins.h. Slot 0 is taken by the SD card.
+CONFIG_ESP_WIFI_REMOTE_ENABLED=y
+CONFIG_ESP_WIFI_REMOTE_LIBRARY_HOSTED=y
+CONFIG_SLAVE_IDF_TARGET_ESP32C6=y
+CONFIG_ESP_HOSTED_ENABLED=y
+CONFIG_ESP_HOSTED_SDIO_HOST_INTERFACE=y
+CONFIG_ESP_HOSTED_SDIO_SLOT_1=y
+CONFIG_ESP_HOSTED_SDIO_4_BIT_BUS=y
+
+# Packet mode, matching the slave built in c6fw/ (CONFIG_ESP_SDIO_STREAMING_MODE=n).
+#
+# Streaming batches several packets into one SDIO read for throughput. With it
+# active on both sides, WiFi works but every BT HCI command times out, so
+# NimBLE never gets past HCI_Reset and BLE never advertises.
+#
+# The two sides must be changed together, slave first: transport_drv.c does
+# assert(0) — a boot loop, not a warning — when the slave is streaming and the
+# host is not. Host-streaming with a packet slave is tolerated, which is what
+# makes the slave-then-host ordering safe.
+CONFIG_ESP_HOSTED_SDIO_OPTIMIZATION_RX_NONE=y
+CONFIG_ESP_HOSTED_SDIO_GPIO_RESET_SLAVE=54
+CONFIG_ESP_HOSTED_PRIV_SDIO_PIN_CLK_SLOT_1=18
+CONFIG_ESP_HOSTED_PRIV_SDIO_PIN_CMD_SLOT_1=19
+CONFIG_ESP_HOSTED_PRIV_SDIO_PIN_D0_SLOT_1=14
+CONFIG_ESP_HOSTED_PRIV_SDIO_PIN_D1_4BIT_BUS_SLOT_1=15
+CONFIG_ESP_HOSTED_PRIV_SDIO_PIN_D2_4BIT_BUS_SLOT_1=16
+CONFIG_ESP_HOSTED_PRIV_SDIO_PIN_D3_4BIT_BUS_SLOT_1=17
+
+# ── BLE: NimBLE host on the P4, controller on the C6 ────────────────
+# The P4 has no BT controller, so the local one is disabled and NimBLE talks
+# to the C6's controller over VHCI carried on the same ESP-Hosted transport.
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y
+CONFIG_BT_CONTROLLER_DISABLED=y
+# With no local controller NimBLE defaults its transport to UART, and
+# esp_hosted's VHCI option is hidden while that is set. Turn it off first.
+CONFIG_BT_NIMBLE_TRANSPORT_UART=n
+CONFIG_ESP_HOSTED_ENABLE_BT_NIMBLE=y
+CONFIG_ESP_HOSTED_NIMBLE_HCI_VHCI=y
+
+# Keep pairing keys across reboots, so a paired PC does not have to re-pair
+# every time the device restarts.
+CONFIG_BT_NIMBLE_NVS_PERSIST=y
+
+# GATT callbacks run on the NimBLE host task, and ours reach into LVGL to
+# update the on-screen BLE monitor. The 4 KB default overflowed on a long
+# console reply (stack protection fault). Anything added to a BLE callback
+# spends this budget, so keep it generous.
+CONFIG_BT_NIMBLE_HOST_TASK_STACK_SIZE=8192

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="800" viewBox="0 0 480 800" font-family="sans-serif"><style>
+.f { font-family: 'Segoe UI', Roboto, system-ui, sans-serif; fill: #424242; }
+.t14 { font-size: 14px; }
+.t16 { font-size: 16px; }
+.t20 { font-size: 20px; font-weight: 600; }
+.t28 { font-size: 28px; font-weight: 700; }
+.mut { opacity: .62; }
+.key { opacity: .72; }
+.tab { font-size: 15px; font-weight: 500; opacity: .55; }
+.tabon { font-size: 15px; font-weight: 600; fill: #2196f3; opacity: 1; }
+.btn { font-size: 16px; font-weight: 600; fill: #fff; }
+.mono { font-family: Consolas, 'SF Mono', ui-monospace, monospace; }
+</style><rect x="0" y="0" width="480" height="800" rx="0" fill="#eeeeee"/><rect x="0" y="0" width="480" height="56" rx="0" fill="#ffffff"/><line x1="0" y1="56" x2="480" y2="56" stroke="#e0e0e0"/><text x="60.0" y="35" class="f tab" text-anchor="middle" >Home</text><text x="180.0" y="35" class="f tabon" text-anchor="middle" >Control</text><rect x="134.0" y="53" width="92.0" height="3" rx="1.5" fill="#2196f3"/><text x="300.0" y="35" class="f tab" text-anchor="middle" >WiFi</text><text x="420.0" y="35" class="f tab" text-anchor="middle" >Update</text><text x="12" y="86" class="f t20" text-anchor="start" >Control</text><text x="12" y="110" class="f t14 mut" text-anchor="start" >Shared with the web page — change it</text><text x="12" y="128" class="f t14 mut" text-anchor="start" >in either place.</text><rect x="12" y="148" width="456" height="226" rx="8" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/><text x="26" y="176" class="f t14 key" text-anchor="start" >Mode</text><rect x="26" y="188" width="428" height="42" rx="6" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/><text x="38" y="214" class="f t16" text-anchor="start" >Run</text><path d="M428 205 l7 8 l7 -8" fill="none" stroke="#424242" stroke-width="2" stroke-linecap="round" opacity=".6"/><text x="26" y="256" class="f t14 key" text-anchor="start" >Level</text><text x="454" y="256" class="f t14 mono" text-anchor="end" >77</text><rect x="26" y="270" width="428" height="8" rx="4" fill="#d5d5d5"/><rect x="26" y="270" width="329" height="8" rx="4" fill="#2196f3"/><circle cx="355" cy="274" r="13" fill="#2196f3"/><text x="26" y="326" class="f t14 key" text-anchor="start" >Indicator</text><rect x="402" y="312" width="52" height="28" rx="14" fill="#2196f3"/><circle cx="440" cy="326" r="11" fill="#fff"/><rect x="12" y="390" width="456" height="86" rx="8" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/><text x="26" y="416" class="f t14 key" text-anchor="start" >Message</text><text x="26" y="450" class="f t20" text-anchor="start" >Hello student</text><text x="12" y="502" class="f t14 mut" text-anchor="start" >Changed from the web page</text></svg>

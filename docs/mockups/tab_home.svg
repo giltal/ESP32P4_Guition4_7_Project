@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="800" viewBox="0 0 480 800" font-family="sans-serif"><style>
+.f { font-family: 'Segoe UI', Roboto, system-ui, sans-serif; fill: #424242; }
+.t14 { font-size: 14px; }
+.t16 { font-size: 16px; }
+.t20 { font-size: 20px; font-weight: 600; }
+.t28 { font-size: 28px; font-weight: 700; }
+.mut { opacity: .62; }
+.key { opacity: .72; }
+.tab { font-size: 15px; font-weight: 500; opacity: .55; }
+.tabon { font-size: 15px; font-weight: 600; fill: #2196f3; opacity: 1; }
+.btn { font-size: 16px; font-weight: 600; fill: #fff; }
+.mono { font-family: Consolas, 'SF Mono', ui-monospace, monospace; }
+</style><rect x="0" y="0" width="480" height="800" rx="0" fill="#eeeeee"/><rect x="0" y="0" width="480" height="56" rx="0" fill="#ffffff"/><line x1="0" y1="56" x2="480" y2="56" stroke="#e0e0e0"/><text x="60.0" y="35" class="f tabon" text-anchor="middle" >Home</text><rect x="14.0" y="53" width="92.0" height="3" rx="1.5" fill="#2196f3"/><text x="180.0" y="35" class="f tab" text-anchor="middle" >Control</text><text x="300.0" y="35" class="f tab" text-anchor="middle" >WiFi</text><text x="420.0" y="35" class="f tab" text-anchor="middle" >Update</text><text x="12" y="90" class="f t28" text-anchor="start" >Guition P4</text><text x="12" y="114" class="f t14 mut" text-anchor="start" >JC4880P443C-I-W</text><rect x="12" y="134" width="456" height="204" rx="8" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/><text x="26" y="166" class="f t14 key" text-anchor="start" >Firmware</text><text x="454" y="166" class="f t14 mono" text-anchor="end" >1.0.0</text><text x="26" y="196" class="f t14 key" text-anchor="start" >Slot</text><text x="454" y="196" class="f t14 mono" text-anchor="end" >ota_0</text><text x="26" y="226" class="f t14 key" text-anchor="start" >WiFi</text><text x="454" y="226" class="f t14" text-anchor="end" >-52 dBm</text><text x="26" y="256" class="f t14 key" text-anchor="start" >IP</text><text x="454" y="256" class="f t14 mono" text-anchor="end" >192.168.1.100</text><text x="26" y="286" class="f t14 key" text-anchor="start" >Bluetooth</text><text x="454" y="286" class="f t14" text-anchor="end" >advertising</text><text x="26" y="316" class="f t14 key" text-anchor="start" >SD card</text><text x="454" y="316" class="f t14" text-anchor="end" >mounted</text></svg>

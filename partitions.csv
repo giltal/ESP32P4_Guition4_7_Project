@@ -1,0 +1,18 @@
+# Guition JC4880P443C-I-W — 16 MB flash, single application with A/B OTA update.
+#
+# One app image lives in ota_0 or ota_1; the running slot updates the other and
+# flips otadata on reboot, so a failed update always leaves a bootable image.
+# There is deliberately no factory partition — with one present the bootloader
+# would fall back to it, and a factory image can never be replaced over the air.
+#
+# ESP32-P4 note: the bootloader is at 0x2000 (not 0x0) and the partition table
+# at 0x8000, so the first entry starts at 0x9000. App partitions must be
+# aligned to 0x10000.
+#
+# Name,     Type, SubType,  Offset,    Size,      Flags
+nvs,        data, nvs,      0x9000,    0x6000,
+otadata,    data, ota,      0xF000,    0x2000,
+phy_init,   data, phy,      0x11000,   0x1000,
+ota_0,      app,  ota_0,    0x20000,   0x600000,
+ota_1,      app,  ota_1,    0x620000,  0x600000,
+storage,    data, fat,      0xC20000,  0x3E0000,

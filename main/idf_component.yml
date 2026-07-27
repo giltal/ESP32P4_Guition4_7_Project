@@ -1,0 +1,11 @@
+dependencies:
+  idf:
+    version: ">=5.5"
+  # Radio for the ESP32-P4, which has none of its own: the ESP32-C6 inside the
+  # JC-ESP32P4-M3 module runs the ESP-Hosted slave and is reached over SDIO.
+  espressif/esp_hosted: "^2.12.8"
+  espressif/esp_wifi_remote: ">=1.3.1"
+  # GUI. esp_lvgl_port binds LVGL to the MIPI-DSI panel and handles the
+  # draw buffers, tearing-avoidance and the LVGL tick/task.
+  lvgl/lvgl: "^9"
+  espressif/esp_lvgl_port: "^2"
