@@ -3,6 +3,11 @@
 Ready-to-flash binaries for the **Guition JC4880P443C-I-W**, so you can run the board without
 installing ESP-IDF.
 
+> **Newest build:
+> [Releases](https://github.com/giltal/ESP32P4_Guition4_7_Project/releases/latest)** — the same
+> files, versioned and dated. The copies in this folder match the most recent release; the
+> release page is the one to trust if they ever differ.
+
 | File | What it is |
 |---|---|
 | `gution_p4.bin` | the application — this is the one for over-the-air updates |

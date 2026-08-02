@@ -1,5 +1,8 @@
 # Gution P4 — student guide
 
+[![Latest release](https://img.shields.io/github/v/release/giltal/ESP32P4_Guition4_7_Project)](https://github.com/giltal/ESP32P4_Guition4_7_Project/releases/latest)
+[![Licence](https://img.shields.io/github/license/giltal/ESP32P4_Guition4_7_Project)](LICENSE)
+
 A 4.3" touchscreen board (ESP32-P4 + ESP32-C6) that you can control from **three places at once**:
 the screen itself, a **web page**, and **Bluetooth** from a phone or PC. Change something in one
 place and the other two follow immediately — that shared state is the thing to play with.
@@ -128,8 +131,10 @@ Three ways to load new firmware, all of which keep the previous version as a fal
 If a new version fails to start properly, the board automatically goes back to the one that
 worked.
 
-A ready-to-flash build lives in **[firmware/](firmware/)** — use `gution_p4.bin` for an update, or
-flash the whole set onto a blank board. See [firmware/README.md](firmware/README.md).
+Ready-to-flash builds are published under
+**[Releases](https://github.com/giltal/ESP32P4_Guition4_7_Project/releases/latest)** — download
+`gution_p4.bin` and upload it using either method above. To set up a blank board instead, take all
+four files and follow [firmware/README.md](firmware/README.md).
 
 ---
 
