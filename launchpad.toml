@@ -1,0 +1,19 @@
+// ESP Launchpad config — lets a browser flash this board with no tools installed.
+//
+//   https://espressif.github.io/esp-launchpad/?flashConfigURL=https://raw.githubusercontent.com/giltal/ESP32P4_Guition4_7_Project/main/launchpad.toml
+//
+// image.esp32-p4 is the merged binary (bootloader + partition table + app),
+// written at offset 0. Bump firmware_images_url to the new tag on each release.
+
+esp_toml_version = 1.0
+firmware_images_url = "https://github.com/giltal/ESP32P4_Guition4_7_Project/releases/download/v1.0.0/"
+supported_apps = ["gution-p4"]
+
+[gution-p4]
+chipsets = ["ESP32-P4"]
+image.esp32-p4 = "gution_p4-merged.bin"
+description = "Guition JC4880P443C-I-W 4.3in touchscreen platform — LVGL UI, WiFi, BLE, web page and OTA, sharing one control state across screen, browser and Bluetooth."
+readme.text = "https://raw.githubusercontent.com/giltal/ESP32P4_Guition4_7_Project/main/README.md"
+console_baudrate = 115200
+android_app_url = ""
+ios_app_url = ""

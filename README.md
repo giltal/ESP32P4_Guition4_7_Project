@@ -131,10 +131,46 @@ Three ways to load new firmware, all of which keep the previous version as a fal
 If a new version fails to start properly, the board automatically goes back to the one that
 worked.
 
-Ready-to-flash builds are published under
+Ready-to-flash builds live under
 **[Releases](https://github.com/giltal/ESP32P4_Guition4_7_Project/releases/latest)** — download
-`gution_p4.bin` and upload it using either method above. To set up a blank board instead, take all
-four files and follow [firmware/README.md](firmware/README.md).
+`gution_p4.bin` and upload it using either method above.
+
+> An update is **refused if it has the same version number** as what is already running. That is
+> what stops a board reinstalling the same image forever, not a fault.
+
+---
+
+## Putting firmware on a blank board
+
+Grab **`gution_p4-merged.bin`** from
+[the latest release](https://github.com/giltal/ESP32P4_Guition4_7_Project/releases/latest). It is
+everything in one file — bootloader, partition table and application — written at address **0**.
+
+### From a browser — nothing to install
+
+Use **Chrome or Edge** (Firefox and Safari cannot talk to serial ports), plug the board in, then:
+
+**[▶ Flash the board](https://espressif.github.io/esp-launchpad/?flashConfigURL=https://raw.githubusercontent.com/giltal/ESP32P4_Guition4_7_Project/main/launchpad.toml)**
+
+Pick the serial port when the browser asks, and press **Flash**. It downloads the firmware itself —
+you do not need to fetch anything first.
+
+If that link ever misbehaves, the manual route always works: open
+[ESP Launchpad](https://espressif.github.io/esp-launchpad/), choose the **DIY** tab, select
+`gution_p4-merged.bin`, set the address to **0**, and flash.
+
+### From the command line
+
+Needs [esptool](https://pypi.org/project/esptool/) (`pip install esptool`):
+
+```bash
+esptool --chip esp32p4 write_flash 0x0 gution_p4-merged.bin
+```
+
+Add `--port COM11` (or `/dev/ttyUSB0`) if it cannot find the board on its own.
+
+The ESP32-C6 radio co-processor is **not** touched by any of this. It keeps its own firmware, which
+the application updates by itself when required.
 
 ---
 

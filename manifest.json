@@ -1,0 +1,16 @@
+{
+  "name": "Gution P4 Platform",
+  "version": "1.0.0",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-P4",
+      "parts": [
+        {
+          "path": "https://github.com/giltal/ESP32P4_Guition4_7_Project/releases/download/v1.0.0/gution_p4-merged.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
