@@ -128,6 +128,9 @@ Three ways to load new firmware, all of which keep the previous version as a fal
 If a new version fails to start properly, the board automatically goes back to the one that
 worked.
 
+A ready-to-flash build lives in **[firmware/](firmware/)** — use `gution_p4.bin` for an update, or
+flash the whole set onto a blank board. See [firmware/README.md](firmware/README.md).
+
 ---
 
 ## From a phone
