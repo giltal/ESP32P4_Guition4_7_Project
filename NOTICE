@@ -22,5 +22,19 @@ This product includes third-party software, all under the Apache License 2.0:
       https://github.com/espressif/esp-hosted-mcu
       Pinned to 2.0.17 deliberately — see CLAUDE.md.
 
+The launcher app in papp/ additionally embeds, under a different licence:
+
+  papp/ui_font.h
+      Montserrat, rasterised into bitmaps by papp/make_font.py from the copy
+      that ships with LVGL.  Copyright The Montserrat Project Authors, under
+      the SIL Open Font License 1.1.
+      https://github.com/JulietaUla/Montserrat
+      The glyph data is compiled into the built .papp.
+
+  papp/main.c, papp/make_font.py
+      The drawing, text and font-generation helpers follow apps/clock in
+      Espressif-independent form from the ESP32-P4 Launcher SDK (Apache 2.0).
+      https://github.com/giltal/ESP32_P4_Launcher
+
 Built against ESP-IDF and LVGL, which are fetched at build time and are not
 redistributed here.

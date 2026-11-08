@@ -60,6 +60,8 @@ components/bsp/          board support + subsystems
 components/{st7701_lcd,gt911_touch,ppa_engine,audio,pngdec,pngaux}/
 main/{main,ui,ble_control,ble_uart,ble_console}.c
 tools/                   PC clients (see below)
+papp/                    the same demo as an ESP32-P4 Launcher app (see below);
+                         builds on its own, shares no code with the firmware
 ```
 
 The C6 slave **source** is not tracked — only the built image
@@ -264,6 +266,56 @@ and produces a tight connect/disconnect loop (tested — `bsp_ble_config_t.requi
 but is `false` for that reason). Clients must talk to it unbonded. iOS is unaffected.
 
 Regenerate documentation screenshots with the console's `tab <0-4>` command plus `GET /shot.png`.
+
+---
+
+## The launcher app (`papp/`)
+
+`papp/` is a second, independent program: the same control-state demo built as a **PAPP** for the
+[ESP32-P4 Launcher](https://github.com/giltal/ESP32_P4_Launcher), published in its Store under
+Community / Education as **Guition 4.3 Demo** (`gil.guition43`). It shares no code with the firmware —
+a PAPP links against the PAPP SDK and the C library only, never ESP-IDF or this `components/` tree.
+
+```bash
+python papp/build.py          # -> build/guition43/guition43.papp
+```
+
+Run it with the **ESP-IDF Python** (it locates `riscv32-esp-elf` under `~/.espressif/tools`); the
+SDK is found through `PAPP_LAUNCHER`, defaulting to `C:\ESPIDFprojects\ESP32_P4_Launcher`.
+`papp/ui_font.h` is generated Montserrat bitmap data, **checked in** so the app builds without
+Pillow; regenerate it with `papp/make_font.py` only if the sizes change.
+
+### What could not come across
+
+The PAPP API is display, input, audio, files, threads and the clock — **there is no networking of
+any kind**. WiFi, the provisioning portal, the web page, the Bluetooth console and OTA therefore
+have no equivalent and stay in the firmware. The app keeps the two surfaces it can reach, the
+screen and the SD card (`/sd/data/gil.guition43/state.txt`, same 2 s quiet-period write as
+`bsp_remote.c`), and the About tab says so rather than pretending otherwise.
+
+### Frame cost, measured on the 4.3" board
+
+Instrumenting the loop gave, per frame at 800x480: full-screen clear **15.7 ms**, draw 27.2 ms,
+`papp_disp_present` 16.3 ms — 16.7 fps. Nearly all of it is PSRAM write bandwidth, not drawing
+logic: the clear alone is 768 KB.
+
+- `fill()` writes **two pixels per store** (`uint32_t`), since it is also every `rrect()`'s inner
+  loop. Clear 15.7 -> 11.4 ms, draw 27.2 -> 23.8 ms, **16.7 -> 19.2 fps**. Even so that is only
+  ~67 MB/s, so the limit is the memory, not the store width.
+- Drawing into an own `PAPP_MEM_LARGE` buffer and handing it over with `papp_disp_present_ext`
+  was **measured and reverted**: identical frame time, 768 KB more PSRAM. The surface buffer was
+  never the bottleneck.
+- The ~15.8 ms `present` is the launcher's PPA rotating the landscape surface onto this portrait
+  panel. It is a fixed floor for any app here, not something the app can avoid.
+
+### Publishing
+
+The app ships as a built binary in the launcher repository: `community/guition43/` holding
+`guition43.papp`, `icon.png`, `screenshot.png` and `app.json`. Raise `papp/version.txt` for every
+release — the Store refuses a version that is not higher — rebuild, copy the four files over, and
+check with `python tools/community.py --base origin/main` in the launcher checkout before opening
+the pull request. Limits worth knowing: `.papp` 4 MB, `icon.png` 64 KB, `screenshot.png` 500 KB,
+and the id prefixes `emu. game. test. sys. lx.` are reserved for the project's own apps.
 
 ---
 

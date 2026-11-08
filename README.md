@@ -227,6 +227,25 @@ a status line every 30 seconds, and says why it last restarted.
 
 ---
 
+## The same demo as a launcher app
+
+If your board runs the [ESP32-P4 Launcher](https://github.com/giltal/ESP32_P4_Launcher) rather than
+this firmware, the control panel is also published there as an app. Open the **Store**, look under
+**Community** (or **Education**), and install **Guition 4.3 Demo**.
+
+It keeps the part of this project that fits a launcher app: the shared control state, saved to the
+SD card, plus a tab showing what the board and the launcher provide and a tab that visualises touch,
+gamepad and keyboard input. A launcher app cannot reach WiFi, Bluetooth, HTTP or firmware update, so
+the web page, the Bluetooth console and OTA stay here in the firmware.
+
+The source is in [papp/](papp/) and builds on its own:
+
+```bash
+python papp/build.py
+```
+
+---
+
 ## Licence
 
 Apache-2.0 — see [LICENSE](LICENSE). Third-party components and their attributions are listed in
