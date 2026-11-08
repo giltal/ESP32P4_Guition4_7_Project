@@ -8,7 +8,8 @@
  * outlives a reboot, and explains the rest on the About tab.
  *
  * Touch: the tabs along the top; X (top right) closes the app.
- * Pad:   L1 / R1 or LEFT / RIGHT change tab, START the menu (tabs, Exit).
+ * Pad:   L1 / R1 or LEFT / RIGHT change tab - except on Input, which shows those
+ *        buttons rather than acting on them; START opens the menu (tabs, Exit).
  *   Control   UP / DOWN level, A indicator, X mode, Y message
  * A USB keyboard types into the message on the Control tab.
  * State lives in /sd/data/gil.guition43/state.txt, written 2 s after the last change.
@@ -127,6 +128,18 @@ static void load(void)
 static uint16_t *s_px;
 static int s_stride;
 
+/* Clip rectangle, the screen unless something narrows it (the Input tab's touch pad). */
+static int s_cx0, s_cy0, s_cx1 = W, s_cy1 = H;
+
+static inline void clip_reset(void) { s_cx0 = 0; s_cy0 = 0; s_cx1 = W; s_cy1 = H; }
+static inline void clip_to(int x, int y, int w, int h)
+{
+    s_cx0 = x < 0 ? 0 : x;
+    s_cy0 = y < 0 ? 0 : y;
+    s_cx1 = x + w > W ? W : x + w;
+    s_cy1 = y + h > H ? H : y + h;
+}
+
 static inline uint16_t mix(uint16_t a, uint16_t b, int t)        /* t 0..256 = a..b */
 {
     int r = ((a >> 11) * (256 - t) + (b >> 11) * t) >> 8;
@@ -137,7 +150,7 @@ static inline uint16_t mix(uint16_t a, uint16_t b, int t)        /* t 0..256 = a
 
 static inline void plot(int x, int y, uint16_t c, int a)          /* a 0..255 */
 {
-    if ((unsigned)x >= W || (unsigned)y >= H || a <= 0) return;
+    if (x < s_cx0 || x >= s_cx1 || y < s_cy0 || y >= s_cy1 || a <= 0) return;
     uint16_t *p = &s_px[y * s_stride + x];
     *p = a >= 255 ? c : mix(*p, c, a + (a >> 7));
 }
@@ -148,10 +161,10 @@ static inline int cover(float v) { return v <= 0 ? 0 : v >= 1 ? 255 : (int)(v * 
  * a 16-bit loop runs at about half the speed. fill is also every rrect's inner loop. */
 static void fill(int x, int y, int w, int h, uint16_t c)
 {
-    if (x < 0) { w += x; x = 0; }
-    if (y < 0) { h += y; y = 0; }
-    if (x + w > W) w = W - x;
-    if (y + h > H) h = H - y;
+    if (x < s_cx0) { w += x - s_cx0; x = s_cx0; }
+    if (y < s_cy0) { h += y - s_cy0; y = s_cy0; }
+    if (x + w > s_cx1) w = s_cx1 - x;
+    if (y + h > s_cy1) h = s_cy1 - y;
     if (w <= 0 || h <= 0) return;
 
     uint32_t c2 = (uint32_t)c << 16 | c;
@@ -551,27 +564,37 @@ static void draw_control(void)
 static int s_touch_x = -1, s_touch_y = -1;
 static char s_last_key[24] = "-";
 
+#define TB_X 34                   /* the touch pad box */
+#define TB_Y (BAR + 54)
+#define TB_W 344
+#define TB_H 190
+
 static void draw_input(void)
 {
     char b[64];
 
-    /* Touch */
+    /* Touch: only presses landing inside the box count, and the highlight stays inside it */
     panel(16, BAR + 16, 380, H - BAR - 32, "TOUCH");
-    rrect(34, BAR + 54, 344, 190, 10, C_BG);
-    if (s_touch_x >= 0) {
-        float fx = 34 + (float)s_touch_x * 344 / W;
-        float fy = BAR + 54 + (float)s_touch_y * 190 / H;
-        disc(fx, fy, 16, mix(C_BG, C_BLUE, 120));
-        disc(fx, fy, 7, C_BLUE);
+    rrect(TB_X, TB_Y, TB_W, TB_H, 10, C_BG);
+    bool in_box = s_touch_x >= TB_X && s_touch_x < TB_X + TB_W &&
+                  s_touch_y >= TB_Y && s_touch_y < TB_Y + TB_H;
+    if (in_box) {
+        clip_to(TB_X, TB_Y, TB_W, TB_H);
+        fill(TB_X, s_touch_y, TB_W, 1, C_BORDER);          /* crosshair across the box */
+        fill(s_touch_x, TB_Y, 1, TB_H, C_BORDER);
+        disc(s_touch_x, s_touch_y, 30, mix(C_BG, C_BLUE, 70));
+        disc(s_touch_x, s_touch_y, 17, C_BLUE);
+        disc(s_touch_x, s_touch_y, 6, C_TEXT);
+        clip_reset();
         snprintf(b, sizeof(b), "x %d   y %d", s_touch_x, s_touch_y);
     } else {
-        text_c(&F_SMALL, 206, BAR + 149, "touch the panel", C_FAINT);
-        snprintf(b, sizeof(b), "not touching");
+        text_c(&F_SMALL, TB_X + TB_W / 2, TB_Y + TB_H / 2, "press inside this box", C_FAINT);
+        snprintf(b, sizeof(b), s_touch_x >= 0 ? "outside the box" : "not touching");
     }
-    text_l(&F_MED, 34, BAR + 272, b, C_TEXT);
+    text_l(&F_MED, 34, BAR + 272, b, in_box ? C_TEXT : C_DIM);
     text_wrap(&F_SMALL, 34, BAR + 296, 344,
-              "Points arrive in surface coordinates, matching what you drew whatever the panel "
-              "size.", C_FAINT);
+              "Only presses inside the box are shown, in surface coordinates - the same ones "
+              "you draw in.", C_FAINT);
 
     /* Gamepad + keyboard */
     panel(412, BAR + 16, W - 412 - 16, H - BAR - 32, "GAMEPAD AND KEYBOARD");
@@ -579,14 +602,15 @@ static void draw_input(void)
     bool have = papp_input_gamepad(0, &gp);
     text_l(&F_MED, 430, BAR + 70, have ? (gp.name[0] ? gp.name : "gamepad") : "no gamepad",
            have ? C_TEXT : C_FAINT);
+    text_l(&F_SMALL, 430, BAR + 96, "shown only here - START for the menu", C_FAINT);
 
     static const struct { const char *n; uint32_t bit; int x, y; } btn[] = {
-        { "Up",   PAPP_BTN_UP,     452, BAR + 160 }, { "Dn", PAPP_BTN_DOWN,  452, BAR + 220 },
-        { "Lf",   PAPP_BTN_LEFT,   422, BAR + 190 }, { "Rt", PAPP_BTN_RIGHT, 482, BAR + 190 },
-        { "A",    PAPP_BTN_A,      610, BAR + 220 }, { "B",  PAPP_BTN_B,     650, BAR + 190 },
-        { "X",    PAPP_BTN_X,      570, BAR + 190 }, { "Y",  PAPP_BTN_Y,     610, BAR + 160 },
-        { "L1",   PAPP_BTN_L1,     540, BAR + 118 }, { "R1", PAPP_BTN_R1,    586, BAR + 118 },
-        { "Sel",  PAPP_BTN_SELECT, 632, BAR + 118 }, { "St", PAPP_BTN_START, 678, BAR + 118 },
+        { "Up",   PAPP_BTN_UP,     452, BAR + 168 }, { "Dn", PAPP_BTN_DOWN,  452, BAR + 228 },
+        { "Lf",   PAPP_BTN_LEFT,   422, BAR + 198 }, { "Rt", PAPP_BTN_RIGHT, 482, BAR + 198 },
+        { "A",    PAPP_BTN_A,      610, BAR + 228 }, { "B",  PAPP_BTN_B,     650, BAR + 198 },
+        { "X",    PAPP_BTN_X,      570, BAR + 198 }, { "Y",  PAPP_BTN_Y,     610, BAR + 168 },
+        { "L1",   PAPP_BTN_L1,     540, BAR + 128 }, { "R1", PAPP_BTN_R1,    586, BAR + 128 },
+        { "Sel",  PAPP_BTN_SELECT, 632, BAR + 128 }, { "St", PAPP_BTN_START, 678, BAR + 128 },
     };
     for (int i = 0; i < (int)(sizeof(btn) / sizeof(btn[0])); i++) {
         bool on = have && (gp.buttons & btn[i].bit);
@@ -596,7 +620,7 @@ static void draw_input(void)
 
     /* Sticks */
     for (int i = 0; i < 2; i++) {
-        int cx = 450 + i * 110, cy = BAR + 274;
+        int cx = 450 + i * 110, cy = BAR + 280;
         ring(cx, cy, 34, 2, C_BORDER);
         int ax = i ? gp.rx : gp.lx, ay = i ? gp.ry : gp.ly;
         if (!have) ax = ay = 0;
@@ -605,11 +629,11 @@ static void draw_input(void)
     }
 
     snprintf(b, sizeof(b), "last key: %s", s_last_key);
-    text_l(&F_SMALL, 430, BAR + 358, b, C_DIM);
+    text_l(&F_SMALL, 430, BAR + 360, b, C_DIM);
     int an = papp_input_analog(PAPP_ANALOG_PADDLE);
     if (an >= 0) snprintf(b, sizeof(b), "paddle %d", an);
     else snprintf(b, sizeof(b), "no paddle");
-    text_r(&F_SMALL, W - 34, BAR + 358, b, C_FAINT);
+    text_r(&F_SMALL, W - 34, BAR + 360, b, C_FAINT);
 }
 
 /* ── About ─────────────────────────────────────────────────────────────── */
@@ -638,8 +662,8 @@ static void draw_about(void)
 
     fill(40, 420, W - 80, 1, C_BORDER);
     text_l(&F_SMALL, 40, 440, "Touch: the tabs above; X closes the app.", C_FAINT);
-    text_l(&F_SMALL, 40, 464, "Pad: L1/R1 tab, START menu, A indicator, X mode, Y message, "
-                              "Up/Down level.", C_FAINT);
+    text_l(&F_SMALL, 40, 464, "Pad: L1/R1 tab (not on Input, which shows them), START menu, "
+                              "A indicator, X mode, Y message, Up/Down level.", C_FAINT);
 }
 
 /* ── Acting on a control ───────────────────────────────────────────────── */
@@ -681,8 +705,13 @@ static uint32_t pad_repeat(uint32_t held, int64_t now)
 
 static void pad(uint32_t press)
 {
-    if (press & (PAPP_BTN_R1 | PAPP_BTN_RIGHT)) s_tab = (s_tab + 1) % T_N;
-    if (press & (PAPP_BTN_L1 | PAPP_BTN_LEFT))  s_tab = (s_tab + T_N - 1) % T_N;
+    /* The Input tab exists to show the buttons, so it must not navigate on them: there you
+     * would press Left to watch Left light up and leave the tab instead. Touch the tabs or
+     * use START to get out. */
+    if (s_tab != T_INPUT) {
+        if (press & (PAPP_BTN_R1 | PAPP_BTN_RIGHT)) s_tab = (s_tab + 1) % T_N;
+        if (press & (PAPP_BTN_L1 | PAPP_BTN_LEFT))  s_tab = (s_tab + T_N - 1) % T_N;
+    }
     if (s_tab != T_CONTROL) return;
     if (press & PAPP_BTN_UP)   act(H_LEVEL_UP, "pad");
     if (press & PAPP_BTN_DOWN) act(H_LEVEL_DN, "pad");
@@ -800,6 +829,7 @@ int main(int argc, char **argv)
         if (s_dirty_at && now - s_dirty_at > SAVE_QUIET_US) save();
 
         s_px = papp_disp_lock(s, &s_stride);
+        clip_reset();
         s_nhit = 0;
         fill(0, 0, W, H, C_BG);
         draw_bar();
